@@ -362,9 +362,9 @@
     const next = q.get('next') || '';
     const isLogin = mode === 'login';
     return `<div class="auth">
-      <div class="auth-side"><div style="max-width:420px"><img src="assets/logo.svg" alt="" width="56" height="56" style="margin-bottom:1.5rem"><h1 style="font-family:var(--serif)">Tu primer empleo empieza con lo que sabes hacer.</h1><p>Cursos cortos, evaluaciones y constancias para demostrarlo.</p></div></div>
+      <div class="auth-side"><div style="max-width:420px"><img src="assets/logo.svg" alt="" width="56" height="56" style="margin-bottom:1.5rem"><p style="font-family:var(--serif);font-size:clamp(1.8rem,4vw,2.6rem);font-weight:700;line-height:1.2;color:#fff">Tu primer empleo empieza con lo que sabes hacer.</p><p>Cursos cortos, evaluaciones y constancias para demostrarlo.</p></div></div>
       <div class="auth-main"><div class="card pad">
-        <h2>${isLogin ? 'Inicia sesión' : 'Crea tu cuenta'}</h2>
+        <h1 style="font-size:1.6rem">${isLogin ? 'Inicia sesión' : 'Crea tu cuenta'}</h1>
         <p class="muted small">${isLogin ? '¿No tienes cuenta?' : '¿Ya tienes cuenta?'} <a href="#/${isLogin ? 'registro' : 'entrar'}${next ? '?next=' + encodeURIComponent(next) : ''}">${isLogin ? 'Regístrate' : 'Inicia sesión'}</a></p>
         <form class="form" id="authForm" novalidate>
           ${isLogin ? '' : `<div class="field"><label for="name">Nombre completo</label><input id="name" type="text" autocomplete="name" required></div>`}
