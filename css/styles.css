@@ -299,3 +299,11 @@ tr:last-child td{border-bottom:0}
 .player-main{min-width:0}
 .lesson-text code{overflow-wrap:anywhere;background:#ECEAE3;padding:.05rem .35rem;border-radius:6px;font-size:.9em}
 @media (max-width:600px){.search{max-width:none;margin-left:0;flex-basis:100%}}
+/* Aviso de propiedad FlympuxLab */
+.dev-banner{background:#0b0b0b;color:#d9d9d9;font-size:.8rem;text-align:center;padding:.45rem 1rem;letter-spacing:.02em;border-bottom:2px solid #39FF14;display:flex;justify-content:center;align-items:center;gap:.45rem;flex-wrap:wrap;position:relative;z-index:40}
+.dev-banner b{color:#39FF14;font-weight:700}
+.dev-banner .dot{width:8px;height:8px;border-radius:50%;background:#39FF14;box-shadow:0 0 8px #39FF14}
+.dev-banner .sep{opacity:.5}
+@media (max-width:600px){.dev-banner .hide-sm{display:none}}
+.dev-watermark{position:fixed;inset:0;pointer-events:none;z-index:45;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='260'%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dominant-baseline='middle' transform='rotate(-24 210 130)' font-family='Arial,sans-serif' font-size='20' font-weight='700' letter-spacing='3' fill='%230B2A3C' fill-opacity='0.055'%3EFLYMPUX LAB · EN DESARROLLO%3C/text%3E%3C/svg%3E");background-repeat:repeat}
+@media print{.dev-banner{display:none!important}.dev-watermark{display:block!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}}
