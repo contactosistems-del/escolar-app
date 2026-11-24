@@ -242,9 +242,16 @@
     let media = '';
     if (l.type === 'video') {
       const src = embedUrl(l.url);
-      media = `<div class="video">${src ? `<iframe src="${esc(src)}" title="${esc(l.title)}" allow="accelerometer; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowfullscreen loading="lazy"></iframe>` : `<div class="video-ph"><div>${I.play.replace('18', '42').replace('18', '42')}<p style="margin:.5rem 0 0">Video de la lección</p><small>El administrador puede agregar el enlace de YouTube o Vimeo desde el panel.</small></div></div>`}</div>`;
+      if (src) media = `<div class="video"><iframe src="${esc(src)}" title="${esc(l.title)}" allow="accelerometer; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowfullscreen loading="lazy"></iframe></div>`;
+      else if (l.slides && l.slides.length) media = `<div class="deck" id="deck" style="--c:${esc(c.color)}">
+          <div class="deck-stage">${l.slides.map((sl, i) => `<div class="slide ${i === 0 ? 'on cover-slide' : ''}" data-i="${i}"><div class="slide-in"><span class="slide-n">${i === 0 ? esc(c.category) : i + ' / ' + (l.slides.length - 1)}</span><h2>${esc(sl[0])}</h2><p>${esc(sl[1])}</p></div></div>`).join('')}
+            <button class="deck-big" id="deckPlay" aria-label="Reproducir">${I.play.replace(/18/g, '34')}</button></div>
+          <div class="deck-bar"><button id="deckPrev" aria-label="Anterior">‹</button><button id="deckToggle" aria-label="Reproducir">${I.play}</button><button id="deckNext" aria-label="Siguiente">›</button>
+            <div class="deck-track">${l.slides.map((_, i) => `<i data-i="${i}"><b></b></i>`).join('')}</div><span class="deck-t" id="deckT">1 / ${l.slides.length}</span></div></div>`;
+      else media = `<div class="video"><div class="video-ph"><div>${I.play.replace(/18/g, '42')}<p style="margin:.5rem 0 0">Video de la lección</p><small>El administrador puede agregar el enlace de YouTube o Vimeo desde el panel.</small></div></div></div>`;
     } else if (l.type === 'doc') {
-      media = `<div class="doc-box"><span style="color:var(--primary-d)">${I.file}</span><div style="flex:1"><b>Material descargable</b><br><span class="small muted">${l.url ? 'Ábrelo o descárgalo para practicar.' : 'El administrador puede agregar el enlace del documento desde el panel.'}</span></div>${l.url ? `<a class="btn sm" href="${esc(l.url)}" target="_blank" rel="noopener">Abrir</a>` : ''}</div>`;
+      const fname = l.url ? decodeURIComponent(l.url.split('/').pop()) : '';
+      media = `<div class="doc-box"><span style="color:var(--primary-d)">${I.file}</span><div style="flex:1"><b>${esc(l.file || 'Material descargable')}</b><br><span class="small muted">${l.url ? 'Descárgalo y úsalo para practicar.' : 'El administrador puede agregar el enlace del documento desde el panel.'}</span></div>${l.url ? `<a class="btn sm" href="${esc(l.url)}" ${/^https?:/.test(l.url) ? 'target="_blank" rel="noopener"' : `download="${esc(fname)}"`}>Descargar</a>` : ''}</div>`;
     }
     const p = Store.progress(e);
     return `<div class="player">
@@ -276,6 +283,20 @@
       Store.completeLesson(u.id, cid, l.id);
       go(next ? `#/aprender/${cid}/${next.id}` : `#/evaluacion/${cid}`);
     };
+    const deck = $('#deck');
+    if (deck) {
+      const slides = $$('.slide', deck), bars = $$('.deck-track i', deck), N = slides.length, DUR = 6000;
+      let i = 0, playing = false, t0 = 0, raf = 0, elapsed = 0;
+      const show = k => { i = Math.max(0, Math.min(N - 1, k)); slides.forEach((s, j) => s.classList.toggle('on', j === i)); bars.forEach((b, j) => { b.firstChild.style.width = j < i ? '100%' : '0%'; }); $('#deckT').textContent = (i + 1) + ' / ' + N; elapsed = 0; t0 = performance.now(); };
+      const icon = () => { $('#deckToggle').innerHTML = playing ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>' : I.play; deck.classList.toggle('playing', playing); };
+      const tick = now => { if (!playing || !document.body.contains(deck)) return; elapsed = now - t0; bars[i].firstChild.style.width = Math.min(100, elapsed / DUR * 100) + '%'; if (elapsed >= DUR) { if (i < N - 1) show(i + 1); else { playing = false; icon(); bars[i].firstChild.style.width = '100%'; return; } } raf = requestAnimationFrame(tick); };
+      const play = () => { if (i === N - 1 && !playing) show(0); playing = true; t0 = performance.now() - elapsed; icon(); cancelAnimationFrame(raf); raf = requestAnimationFrame(tick); };
+      const pause = () => { playing = false; icon(); cancelAnimationFrame(raf); };
+      $('#deckPlay').onclick = play; $('#deckToggle').onclick = () => playing ? pause() : play();
+      $('#deckPrev').onclick = () => { show(i - 1); if (playing) t0 = performance.now(); };
+      $('#deckNext').onclick = () => { show(i + 1); if (playing) t0 = performance.now(); };
+      bars.forEach((b, j) => b.onclick = () => { show(j); if (playing) t0 = performance.now(); });
+    }
     const pick = $('#lessonPick'); if (pick) pick.onchange = () => go(pick.value === '__quiz' ? `#/evaluacion/${cid}` : `#/aprender/${cid}/${pick.value}`);
   };
 

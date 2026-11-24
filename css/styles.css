@@ -311,3 +311,24 @@ tr:last-child td{border-bottom:0}
 .faq p{margin:.6rem 0 0;color:var(--ink-2)}
 .filters select{width:auto;border-radius:999px;padding:.45rem .9rem;font-size:.88rem;font-weight:600}
 .course-body .st{align-self:flex-start}
+/* Presentación animada de lección */
+.deck{border-radius:var(--radius);overflow:hidden;background:var(--ink);color:#fff;box-shadow:var(--shadow)}
+.deck-stage{position:relative;aspect-ratio:16/9;background:radial-gradient(120% 120% at 100% 0%,color-mix(in srgb,var(--c) 70%,#000) 0%,var(--ink) 60%)}
+.slide{position:absolute;inset:0;display:flex;align-items:center;padding:6% 8%;opacity:0;transform:translateX(24px);transition:opacity .5s,transform .5s;pointer-events:none}
+.slide.on{opacity:1;transform:none}
+.slide-in{max-width:80%}
+.slide-n{display:inline-block;font-size:.75rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--amber);margin-bottom:.8rem}
+.slide h2{font-size:clamp(1.2rem,3.4vw,2.2rem);margin:0 0 .6rem;color:#fff}
+.slide p{font-size:clamp(.9rem,1.9vw,1.2rem);color:#C9D6E5;margin:0;line-height:1.5}
+.cover-slide h2{font-family:var(--serif);font-size:clamp(1.5rem,4.4vw,2.8rem)}
+.deck-big{position:absolute;right:6%;bottom:9%;width:72px;height:72px;border-radius:50%;border:0;background:var(--amber);color:var(--ink);display:grid;place-items:center;cursor:pointer;box-shadow:0 10px 30px rgba(0,0,0,.35);transition:transform .15s,opacity .3s}
+.deck-big:hover{transform:scale(1.06)}
+.deck.playing .deck-big{opacity:0;pointer-events:none}
+.deck-bar{display:flex;align-items:center;gap:.5rem;padding:.6rem .8rem;background:rgba(0,0,0,.25)}
+.deck-bar button{background:rgba(255,255,255,.1);border:0;color:#fff;width:34px;height:34px;border-radius:8px;cursor:pointer;font-size:1.3rem;display:grid;place-items:center;flex:none}
+.deck-bar button:hover{background:rgba(255,255,255,.2)}
+.deck-track{flex:1;display:flex;gap:4px}
+.deck-track i{flex:1;height:5px;background:rgba(255,255,255,.18);border-radius:4px;overflow:hidden;cursor:pointer}
+.deck-track i b{display:block;height:100%;width:0;background:var(--mint)}
+.deck-t{font-size:.78rem;color:#C9D6E5;min-width:42px;text-align:right}
+@media (max-width:600px){.deck-big{width:44px;height:44px;right:4%;bottom:6%}.slide{align-items:flex-start;padding:8% 7%}.slide-in{max-width:100%}}
