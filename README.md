@@ -1,8 +1,7 @@
-# Edu Work · Plataforma de capacitación para estudiantes
+# EduWork · Plataforma de capacitación para estudiantes
 
 Prototipo funcional de una plataforma web de capacitación enfocada en las habilidades que piden las empresas (Excel, trabajo en equipo, elaboración de reportes, comunicación profesional).
 
-Desarrollado por **FlympuxLab**.
 
 ## Funciones
 - Registro e inicio de sesión de estudiantes

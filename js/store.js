@@ -1,8 +1,8 @@
-/* Edu Work · capa de datos del prototipo.
+/* EduWork · capa de datos del prototipo.
    Guarda todo en localStorage del navegador (no requiere servidor).
    Para producción se reemplaza por una API + base de datos. */
 (function () {
-  const DB_KEY = 'eduwork_db_v1';
+  const DB_KEY = 'eduwork_db_v2';
   const SESSION_KEY = 'eduwork_session_v1';
 
   const uid = (p = '') => p + Math.random().toString(36).slice(2, 9) + Date.now().toString(36).slice(-4);
@@ -19,7 +19,7 @@
   function seedCourses() {
     return [
       {
-        id: 'c-excel', title: 'Excel para el trabajo', category: 'Herramientas digitales', level: 'Básico', hours: 4,
+        id: 'c-excel', objective: 'Organizar datos en una hoja de cálculo, usar fórmulas básicas y resumir información con tablas dinámicas.', title: 'Excel para el trabajo', category: 'Herramientas digitales', level: 'Básico', hours: 4,
         color: '#0E8A6A', glyph: 'grid', published: true,
         summary: 'Fórmulas, formato y tablas para organizar datos como lo piden en una oficina.',
         description: 'Aprende lo que más se usa de Excel en un empleo real: capturar y dar formato a datos, usar fórmulas básicas, filtrar información y armar una tabla dinámica sencilla para responder preguntas de tu jefe.',
@@ -50,7 +50,7 @@
         ] }
       },
       {
-        id: 'c-equipo', title: 'Trabajo en equipo', category: 'Habilidades blandas', level: 'Básico', hours: 3,
+        id: 'c-equipo', objective: 'Definir roles, organizar tareas con fechas y resolver desacuerdos de forma profesional dentro de un equipo.', title: 'Trabajo en equipo', category: 'Habilidades blandas', level: 'Básico', hours: 3,
         color: '#2F5FD0', glyph: 'people', published: true,
         summary: 'Roles, acuerdos y manejo de conflictos para que tu equipo sí entregue.',
         description: 'Las empresas buscan personas que colaboren. En este curso aprenderás a definir roles, organizar tareas, dar seguimiento y resolver desacuerdos sin romper el equipo.',
@@ -72,7 +72,7 @@
         ] }
       },
       {
-        id: 'c-reportes', title: 'Elaboración de reportes', category: 'Comunicación escrita', level: 'Intermedio', hours: 3,
+        id: 'c-reportes', objective: 'Elaborar un reporte con resumen ejecutivo, datos que lo respalden y recomendaciones accionables.', title: 'Elaboración de reportes', category: 'Comunicación escrita', level: 'Intermedio', hours: 3,
         color: '#B4532A', glyph: 'doc', published: true,
         summary: 'Estructura, datos y conclusiones: reportes que tu jefe sí lee.',
         description: 'Aprende a convertir información en un reporte claro: resumen al inicio, datos que respaldan, gráficas útiles y recomendaciones accionables.',
@@ -92,7 +92,7 @@
         ] }
       },
       {
-        id: 'c-comunicacion', title: 'Comunicación profesional', category: 'Habilidades blandas', level: 'Básico', hours: 3,
+        id: 'c-comunicacion', objective: 'Redactar correos claros, participar en reuniones y presentar una idea en tres minutos.', title: 'Comunicación profesional', category: 'Habilidades blandas', level: 'Básico', hours: 3,
         color: '#7A3FB8', glyph: 'chat', published: true,
         summary: 'Correos, juntas y presentaciones con un tono claro y profesional.',
         description: 'Escribe correos que obtienen respuesta, participa en reuniones con seguridad y presenta ideas de forma breve y ordenada.',
@@ -109,13 +109,34 @@
           { q: '¿Cómo se cierra una reunión productiva?', options: ['Con acuerdos: qué, quién y cuándo', 'Sin conclusiones', 'Con otra reunión', 'Con chismes'], answer: 0 },
           { q: 'La fórmula para presentar en 3 minutos es…', options: ['Saludo largo y anécdotas', 'Problema, propuesta, beneficio y siguiente paso', 'Leer todas las diapositivas', 'Improvisar'], answer: 1 }
         ] }
+      },
+      {
+        id: 'c-tiempo', title: 'Organización del tiempo', category: 'Habilidades blandas', level: 'Básico', hours: 2,
+        color: '#176B9A', glyph: 'clock', published: true,
+        objective: 'Priorizar tareas, planear una semana de trabajo y evitar la procrastinación con técnicas sencillas.',
+        summary: 'Prioriza, planea tu semana y cumple tus entregas sin estrés.',
+        description: 'Aprende a distinguir lo urgente de lo importante, planear tu semana combinando escuela y trabajo, y usar técnicas como bloques de tiempo y Pomodoro para avanzar en tus pendientes.',
+        lessons: [
+          { id: 'l1', title: 'Urgente vs. importante', type: 'text', minutes: 8, content:
+`<p>La <strong>matriz de Eisenhower</strong> clasifica tus pendientes en cuatro cuadrantes:</p>
+<ul><li><strong>Urgente e importante:</strong> hazlo ya (entrega de mañana).</li><li><strong>Importante, no urgente:</strong> agéndalo (estudiar para el examen del próximo mes).</li><li><strong>Urgente, no importante:</strong> delega o resuélvelo rápido.</li><li><strong>Ni urgente ni importante:</strong> elimínalo.</li></ul>` },
+          { id: 'l2', title: 'Planea tu semana', type: 'video', minutes: 10, url: '', content:
+`<p>Dedica 15 minutos el domingo: anota entregas y compromisos, asigna <strong>bloques de tiempo</strong> en tu calendario y deja espacios libres para imprevistos.</p>` },
+          { id: 'l3', title: 'Técnica Pomodoro', type: 'text', minutes: 7, content:
+`<p>Trabaja <strong>25 minutos</strong> sin distracciones y descansa <strong>5</strong>. Cada 4 ciclos toma un descanso largo de 15–30 minutos. Silencia notificaciones mientras dura el bloque.</p>` }
+        ],
+        quiz: { passing: 70, questions: [
+          { q: 'Una tarea importante pero no urgente se debe…', options: ['Eliminar', 'Agendar', 'Ignorar', 'Delegar siempre'], answer: 1 },
+          { q: '¿Cuánto dura un bloque Pomodoro clásico?', options: ['10 minutos', '25 minutos', '60 minutos', '2 horas'], answer: 1 },
+          { q: 'Planear la semana con anticipación ayuda a…', options: ['Trabajar sin descansos', 'Evitar entregas de último momento', 'Tener más pendientes', 'Nada'], answer: 1 }
+        ] }
       }
     ];
   }
 
   async function seed() {
     const now = new Date().toISOString();
-    const admin = { id: 'u-admin', name: 'Administrador Edu Work', email: 'admin@eduwork.mx', pass: await hash('admin123'), role: 'admin', school: '', career: '', bio: '', createdAt: now };
+    const admin = { id: 'u-admin', name: 'Administrador EduWork', email: 'admin@eduwork.mx', pass: await hash('admin123'), role: 'admin', school: '', career: '', bio: '', createdAt: now };
     const demo = { id: 'u-demo', name: 'Ana López', email: 'estudiante@eduwork.mx', pass: await hash('demo123'), role: 'student', school: 'Universidad Demo', career: 'Administración', bio: 'Estudiante de 6.º semestre.', createdAt: now };
     const db = {
       version: 1,
@@ -124,6 +145,9 @@
       enrollments: [
         { id: uid('e-'), userId: 'u-demo', courseId: 'c-excel', enrolledAt: now, completed: ['l1', 'l2'], quiz: null, certificate: null },
         { id: uid('e-'), userId: 'u-demo', courseId: 'c-comunicacion', enrolledAt: now, completed: ['l1', 'l2', 'l3'], quiz: { best: 100, attempts: 1, passedAt: now }, certificate: { folio: 'EW-2026-' + Math.random().toString(36).slice(2, 7).toUpperCase(), issuedAt: now } }
+      ],
+      suggestions: [
+        { id: uid('s-'), userId: 'u-demo', name: 'Ana López', topic: 'Excel intermedio: gráficos y BUSCARV', note: 'Me lo piden en mis prácticas profesionales.', createdAt: now }
       ]
     };
     return db;
@@ -191,6 +215,17 @@
       if (!e.completed.includes(lessonId)) { e.completed.push(lessonId); this.save(); }
       return e;
     },
+    status(e) {
+      if (!e) return 'none';
+      if (e.certificate) return 'done';
+      return (e.completed.length || (e.quiz && e.quiz.attempts)) ? 'prog' : 'none';
+    },
+    addSuggestion(user, topic, note) {
+      this.db.suggestions = this.db.suggestions || [];
+      this.db.suggestions.unshift({ id: uid('s-'), userId: user ? user.id : null, name: user ? user.name : 'Visitante', topic: topic.trim(), note: (note || '').trim(), createdAt: new Date().toISOString() });
+      this.save();
+    },
+    deleteSuggestion(id) { this.db.suggestions = (this.db.suggestions || []).filter(s => s.id !== id); this.save(); },
     progress(e) {
       const c = this.course(e.courseId); if (!c) return 0;
       const total = c.lessons.length + 1; // +1 por la evaluación

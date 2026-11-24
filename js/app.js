@@ -1,4 +1,4 @@
-/* Edu Work · interfaz (SPA con rutas por hash) */
+/* EduWork · interfaz (SPA con rutas por hash) */
 (function () {
   const $ = (s, el = document) => el.querySelector(s);
   const $$ = (s, el = document) => Array.from(el.querySelectorAll(s));
@@ -35,6 +35,7 @@
     people: '<svg width="64" height="64" viewBox="0 0 64 64" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="3"><circle cx="22" cy="22" r="8"/><circle cx="44" cy="24" r="6"/><path d="M8 50c0-8 6-14 14-14s14 6 14 14M38 48c0-6 4-10 9-10s9 4 9 10"/></svg>',
     doc: '<svg width="64" height="64" viewBox="0 0 64 64" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="3"><path d="M16 8h22l12 12v36H16z"/><path d="M38 8v12h12M24 34h8v12h-8zM36 40h6v6h-6zM36 30h6"/></svg>',
     chat: '<svg width="64" height="64" viewBox="0 0 64 64" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="3"><path d="M10 14h32v22H24l-8 7v-7h-6z"/><path d="M46 24h8v20h-5v6l-7-6H30v-4"/></svg>',
+    clock: '<svg width="64" height="64" viewBox="0 0 64 64" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="3"><circle cx="32" cy="34" r="22"/><path d="M32 22v12l8 6M26 8h12"/></svg>',
     star: '<svg width="64" height="64" viewBox="0 0 64 64" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="3"><path d="m32 8 7 15 16 2-12 11 3 16-14-8-14 8 3-16L9 25l16-2z"/></svg>'
   };
   const typeLabel = { video: 'Video', doc: 'Documento', text: 'Lección' };
@@ -57,12 +58,15 @@
     return `<a class="card course-card" href="#/curso/${c.id}">
       ${cover(c)}
       <div class="course-body">
+        ${user ? stTag(e) : ''}
         <h3>${esc(c.title)}</h3>
         <p>${esc(c.summary)}</p>
         <div class="meta"><span>${I.layers}${c.lessons.length} lecciones</span><span>${I.clock}${c.hours} h</span><span>${I.level}${esc(c.level)}</span></div>
-        ${e ? `<div class="row between small"><span class="muted">${p === 100 ? 'Completado' : 'Tu avance'}</span><b>${p}%</b></div><div class="bar"><i style="width:${p}%"></i></div>` : ''}
+        ${e ? `<div class="row between small"><span class="muted">Tu avance</span><b>${p}%</b></div><div class="bar"><i style="width:${p}%"></i></div>` : ''}
       </div></a>`;
   }
+  const stLabel = { none: 'No iniciado', prog: 'En progreso', done: 'Completado' };
+  function stTag(e) { const k = Store.status(e); return `<span class="st ${k}">${stLabel[k]}</span>`; }
   function ring(p) { return `<div class="ring" style="--p:${p}"><span>${p}%</span></div>`; }
   function embedUrl(url) {
     if (!url) return '';
@@ -82,7 +86,7 @@
   function renderTopbar(route) {
     const u = Store.currentUser();
     const a = (href, label) => `<a href="${href}" class="${route.startsWith(href.slice(1)) && href !== '#/' ? 'active' : ''}">${label}</a>`;
-    let links = a('#/cursos', 'Cursos') + a('#/verificar', 'Verificar constancia');
+    let links = a('#/cursos', 'Cursos') + a('#/verificar', 'Verificar constancia') + a('#/ayuda', 'Ayuda');
     if (u) {
       links += a('#/panel', 'Mi progreso');
       if (u.role === 'admin') links += a('#/admin', 'Administración');
@@ -91,7 +95,7 @@
       links += a('#/entrar', 'Iniciar sesión') + `<a class="btn sm" href="#/registro" style="color:#fff">Crear cuenta</a>`;
     }
     $('#topbar').innerHTML = `<div class="wrap topbar-in">
-      <a class="brand" href="#/"><img src="assets/logo.svg" alt=""><span>Edu Work</span></a>
+      <a class="brand" href="#/"><img src="assets/logo.svg" alt=""><span>EduWork</span></a>
       <button class="menu-btn" aria-label="Menú" id="menuBtn">${I.menu}</button>
       <nav class="nav" id="nav">${links}</nav></div>`;
     $('#menuBtn').onclick = () => $('#nav').classList.toggle('open');
@@ -106,9 +110,9 @@
     return `
     <section class="hero"><div class="wrap hero-grid">
       <div>
-        <span class="eyebrow">Capacitación para estudiantes</span>
+        <span class="eyebrow">Capacitación que conecta</span>
         <h1>Las habilidades que piden las empresas, <em>en cursos cortos</em>.</h1>
-        <p class="lead">Excel, trabajo en equipo, reportes y comunicación profesional. Aprende a tu ritmo, comprueba lo que sabes y obtén tu constancia digital.</p>
+        <p class="lead"><span class="slogan">Aprende hoy, prepárate para el trabajo de mañana.</span> Excel, trabajo en equipo, reportes, comunicación profesional y organización del tiempo: aprende a tu ritmo, comprueba lo que sabes y obtén tu constancia digital.</p>
         <div class="hero-cta">
           ${u ? `<a class="btn" href="#/panel">Continuar aprendiendo</a>` : `<a class="btn" href="#/registro">Crear cuenta gratis</a>`}
           <a class="btn ghost" href="#/cursos">Ver cursos</a>
@@ -159,20 +163,23 @@
   views.catalog = (q) => {
     const u = Store.currentUser();
     const cats = [...new Set(Store.courses().map(c => c.category))];
-    const cat = q.get('cat') || ''; const s = (q.get('q') || '').toLowerCase();
-    const list = Store.courses().filter(c => (!cat || c.category === cat) && (!s || (c.title + ' ' + c.summary).toLowerCase().includes(s)));
+    const cat = q.get('cat') || ''; const s = (q.get('q') || '').toLowerCase(); const lvl = q.get('nivel') || '';
+    const list = Store.courses().filter(c => (!cat || c.category === cat) && (!lvl || c.level === lvl) && (!s || (c.title + ' ' + c.summary).toLowerCase().includes(s)));
     return `<div class="wrap">
       <div class="page-head"><h1>Catálogo de cursos</h1><p>Elige un curso, inscríbete y avanza a tu ritmo. Al aprobar la evaluación obtienes tu constancia digital.</p></div>
       <div class="filters">
         <button class="chip ${!cat ? 'on' : ''}" data-cat="">Todos</button>
         ${cats.map(c => `<button class="chip ${cat === c ? 'on' : ''}" data-cat="${esc(c)}">${esc(c)}</button>`).join('')}
+        <select id="lvl" aria-label="Nivel"><option value="">Todos los niveles</option>${['Básico', 'Intermedio', 'Avanzado'].map(l => `<option ${lvl === l ? 'selected' : ''}>${l}</option>`).join('')}</select>
         <input class="search" type="search" placeholder="Buscar curso…" value="${esc(q.get('q') || '')}" id="search">
       </div>
       ${list.length ? `<div class="grid">${list.map(c => courseCard(c, u)).join('')}</div>` : `<div class="card empty">No encontramos cursos con ese filtro.</div>`}
+      <p class="small muted center mt">¿No encuentras el curso que necesitas? <a href="#/ayuda?sugerir=1">Sugiere un tema</a>.</p>
       <div style="height:3rem"></div></div>`;
   };
   views.catalog.mount = (q) => {
     $$('[data-cat]').forEach(b => b.onclick = () => { const p = new URLSearchParams(q); b.dataset.cat ? p.set('cat', b.dataset.cat) : p.delete('cat'); go('#/cursos?' + p); });
+    $('#lvl').onchange = ev => { const p = new URLSearchParams(q); ev.target.value ? p.set('nivel', ev.target.value) : p.delete('nivel'); go('#/cursos?' + p); };
     const s = $('#search'); let t;
     s.oninput = () => { clearTimeout(t); t = setTimeout(() => { const p = new URLSearchParams(q); s.value ? p.set('q', s.value) : p.delete('q'); history.replaceState(null, '', '#/cursos?' + p); render(true); }, 250); };
     if (q.get('q')) { s.focus(); s.setSelectionRange(s.value.length, s.value.length); }
@@ -200,6 +207,7 @@
     </div></section>
     <section class="section"><div class="wrap two-col">
       <div>
+        ${c.objective ? `<div class="objective"><span style="color:#7A5A0C">${I.award}</span><div><b>Objetivo de aprendizaje</b>${esc(c.objective)}</div></div>` : ''}
         <h2>Contenido del curso</h2>
         <div class="card"><ul class="syllabus">
           ${c.lessons.map((l, i) => { const d = e && e.completed.includes(l.id); const inner = `<span class="n ${d ? 'done' : ''}">${d ? I.check : i + 1}</span><span class="t">${esc(l.title)}<br><span class="small muted">${typeLabel[l.type]} · ${l.minutes} min</span></span>`;
@@ -319,7 +327,7 @@
     return `<div class="cert-wrap"><div class="wrap" style="max-width:960px">
       ${own ? `<div class="row between no-print" style="margin-bottom:1rem"><a href="#/panel" class="small">← Mi progreso</a><div class="row"><button class="btn ghost sm" id="copyLink">Copiar enlace</button><button class="btn sm" onclick="window.print()">Descargar / imprimir PDF</button></div></div>` : ''}
       <div class="cert">
-        <div class="cert-top"><div class="brand"><img src="assets/logo.svg" alt=""><span>Edu Work</span></div><span class="small muted">Folio: <b>${esc(e.certificate.folio)}</b></span></div>
+        <div class="cert-top"><div class="brand"><img src="assets/logo.svg" alt=""><span>EduWork</span></div><span class="small muted">Folio: <b>${esc(e.certificate.folio)}</b></span></div>
         <div class="cert-body">
           <div class="k">Constancia de acreditación</div>
           <h2>Se otorga la presente a</h2>
@@ -331,7 +339,7 @@
         <div class="cert-foot">
           <div><b>Fecha de emisión</b><br>${fmtDate(e.certificate.issuedAt)}</div>
           <div class="seal">EDU WORK<br>VERIFICADA</div>
-          <div class="sig"><b>Coordinación académica</b><br>Edu Work</div>
+          <div class="sig"><b>Coordinación académica</b><br>EduWork</div>
         </div>
       </div>
       ${own ? `<p class="small muted center mt no-print">Cualquier persona puede verificar esta constancia en <a href="${esc(url)}">${esc(url.replace(/^https?:\/\//, ''))}</a></p>` : ''}
@@ -362,7 +370,7 @@
     const next = q.get('next') || '';
     const isLogin = mode === 'login';
     return `<div class="auth">
-      <div class="auth-side"><div style="max-width:420px"><img src="assets/logo.svg" alt="" width="56" height="56" style="margin-bottom:1.5rem"><p style="font-family:var(--serif);font-size:clamp(1.8rem,4vw,2.6rem);font-weight:700;line-height:1.2;color:#fff">Tu primer empleo empieza con lo que sabes hacer.</p><p>Cursos cortos, evaluaciones y constancias para demostrarlo.</p></div></div>
+      <div class="auth-side"><div style="max-width:420px"><img src="assets/logo.svg" alt="" width="56" height="56" style="margin-bottom:1.5rem"><p style="font-family:var(--serif);font-size:clamp(1.8rem,4vw,2.6rem);font-weight:700;line-height:1.2;color:#fff">Tu primer empleo empieza con lo que sabes hacer.</p><p>Aprende hoy, prepárate para el trabajo de mañana. Cursos cortos, evaluaciones y constancias para demostrarlo.</p></div></div>
       <div class="auth-main"><div class="card pad">
         <h1 style="font-size:1.6rem">${isLogin ? 'Inicia sesión' : 'Crea tu cuenta'}</h1>
         <p class="muted small">${isLogin ? '¿No tienes cuenta?' : '¿Ya tienes cuenta?'} <a href="#/${isLogin ? 'registro' : 'entrar'}${next ? '?next=' + encodeURIComponent(next) : ''}">${isLogin ? 'Regístrate' : 'Inicia sesión'}</a></p>
@@ -400,10 +408,10 @@
     const avg = es.length ? Math.round(es.reduce((a, e) => a + Store.progress(e), 0) / es.length) : 0;
     const lessons = es.reduce((a, e) => a + e.completed.length, 0);
     const item = e => { const c = Store.course(e.courseId); const p = Store.progress(e); const next = c.lessons.find(l => !e.completed.includes(l.id));
-      return `<div class="progress-item">${ring(p)}<div class="info"><h4>${esc(c.title)}</h4><div class="small muted">${e.completed.length}/${c.lessons.length} lecciones · ${e.quiz ? 'Evaluación: ' + e.quiz.best + '%' : 'Evaluación pendiente'}</div></div>
+      return `<div class="progress-item">${ring(p)}<div class="info"><div class="row" style="gap:.5rem;margin-bottom:.25rem"><h4 style="margin:0">${esc(c.title)}</h4>${stTag(e)}</div><div class="small muted">${e.completed.length}/${c.lessons.length} lecciones · ${e.quiz ? 'Evaluación: ' + e.quiz.best + '%' : 'Evaluación pendiente'}</div></div>
         <div class="acts">${e.certificate ? `<a class="btn amber sm" href="#/constancia/${c.id}">Constancia</a>` : next ? `<a class="btn sm" href="#/aprender/${c.id}/${next.id}">Continuar</a>` : `<a class="btn sm" href="#/evaluacion/${c.id}">Presentar evaluación</a>`}</div></div>`; };
     return `<div class="wrap">
-      <div class="page-head row between"><div><h1>Hola, ${esc(u.name.split(' ')[0])}</h1><p style="margin:0">Este es tu avance en Edu Work.</p></div><a class="btn ghost" href="#/cursos">Explorar cursos</a></div>
+      <div class="page-head row between"><div><h1>Hola, ${esc(u.name.split(' ')[0])}</h1><p style="margin:0">Este es tu avance en EduWork.</p></div><a class="btn ghost" href="#/cursos">Explorar cursos</a></div>
       <div class="stats">
         <div class="stat"><b>${es.length}</b><span>cursos inscritos</span></div>
         <div class="stat"><b>${lessons}</b><span>lecciones completadas</span></div>
@@ -445,9 +453,35 @@
     $('#logout').onclick = () => { Store.logout(); toast('Sesión cerrada'); go('#/'); };
   };
 
+  views.help = () => {
+    const u = Store.currentUser();
+    const faq = [
+      ['¿Cómo creo mi cuenta?', 'Da clic en "Crear cuenta", escribe tu nombre, correo y una contraseña de al menos 6 caracteres. Tu escuela y carrera son opcionales.'],
+      ['¿Cómo me inscribo a un curso?', 'Entra a "Cursos", elige uno, revisa su objetivo y temario, y da clic en "Inscribirme al curso".'],
+      ['¿Cómo avanzo en un curso?', 'Abre cada lección y, al terminarla, da clic en "Marcar como completada y seguir". Tu avance se guarda y puedes retomarlo cuando quieras.'],
+      ['¿Qué significan los estados?', '<b>No iniciado:</b> aún no comienzas. <b>En progreso:</b> ya completaste al menos una lección. <b>Completado:</b> aprobaste la evaluación final.'],
+      ['¿Cómo obtengo mi constancia?', 'Completa todas las lecciones y aprueba la evaluación final con la calificación mínima. La constancia aparece en "Mi progreso" y puedes descargarla en PDF.'],
+      ['¿Cómo verifico una constancia?', 'En "Verificar constancia" escribe el folio que aparece en el documento (por ejemplo EW-2026-AB12C).']
+    ];
+    return `<div class="narrow section">
+      <h1>Ayuda</h1><p class="muted">Respuestas rápidas para usar EduWork.</p>
+      <div class="card faq">${faq.map(([q, a]) => `<details><summary>${q}</summary><p>${a}</p></details>`).join('')}</div>
+      <h2 class="mt" id="sugerir">Sugiere un curso</h2>
+      <p class="muted">¿Qué habilidad te gustaría fortalecer? Tu sugerencia ayuda a ampliar el catálogo.</p>
+      <form class="card pad form" id="sugForm">
+        <div class="field"><label for="sTopic">Tema del curso</label><input id="sTopic" type="text" placeholder="Ej. Excel intermedio, entrevistas de trabajo…" required></div>
+        <div class="field"><label for="sNote">¿Para qué lo necesitas? <small>(opcional)</small></label><textarea id="sNote" style="min-height:80px"></textarea></div>
+        <div class="row"><button class="btn" type="submit">Enviar sugerencia</button>${u ? '' : '<span class="small muted">Puedes enviarla sin iniciar sesión.</span>'}</div>
+      </form><div style="height:2rem"></div></div>`;
+  };
+  views.help.mount = (q) => {
+    if (q.get('sugerir')) setTimeout(() => $('#sugerir')?.scrollIntoView({ behavior: 'smooth' }), 50);
+    $('#sugForm').onsubmit = ev => { ev.preventDefault(); const t = $('#sTopic').value.trim(); if (!t) return toast('Escribe el tema'); Store.addSuggestion(Store.currentUser(), t, $('#sNote').value); ev.target.reset(); toast('¡Gracias! Recibimos tu sugerencia'); };
+  };
+
   /* ---------- Administración ---------- */
   function needAdmin() { const u = needLogin(); if (!u) return null; if (u.role !== 'admin') { app.innerHTML = `<div class="narrow section"><div class="card pad center"><h2>Acceso restringido</h2><p class="muted">Esta sección es solo para administradores.</p><a class="btn" href="#/panel">Ir a mi progreso</a></div></div>`; return null; } return u; }
-  const adminTabs = t => `<div class="admin-tabs"><a href="#/admin" class="${t === 'cursos' ? 'on' : ''}">Cursos</a><a href="#/admin/estudiantes" class="${t === 'est' ? 'on' : ''}">Estudiantes</a><a href="#/admin/constancias" class="${t === 'cons' ? 'on' : ''}">Constancias</a></div>`;
+  const adminTabs = t => `<div class="admin-tabs"><a href="#/admin" class="${t === 'cursos' ? 'on' : ''}">Cursos</a><a href="#/admin/estudiantes" class="${t === 'est' ? 'on' : ''}">Estudiantes</a><a href="#/admin/constancias" class="${t === 'cons' ? 'on' : ''}">Constancias</a><a href="#/admin/sugerencias" class="${t === 'sug' ? 'on' : ''}">Sugerencias${(Store.db.suggestions || []).length ? ' (' + Store.db.suggestions.length + ')' : ''}</a></div>`;
 
   views.admin = () => {
     if (!needAdmin()) return null;
@@ -461,6 +495,14 @@
         <div class="stat"><b>${db.enrollments.length}</b><span>inscripciones</span></div>
         <div class="stat"><b>${db.enrollments.filter(e => e.certificate).length}</b><span>constancias emitidas</span></div>
       </div>
+      ${(() => { const started = db.enrollments.filter(e => Store.status(e) !== 'none'); const done = db.enrollments.filter(e => e.certificate); const qz = db.enrollments.filter(e => e.quiz);
+        const rate = started.length ? Math.round(done.length / started.length * 100) : 0; const avgQ = qz.length ? Math.round(qz.reduce((a, e) => a + e.quiz.best, 0) / qz.length) : 0;
+        const lessonsDone = db.enrollments.reduce((a, e) => a + e.completed.length, 0);
+        return `<h3>Indicadores del prototipo</h3><div class="stats">
+          <div class="stat"><b>${rate}%</b><span>tasa de finalización (completados ÷ iniciados)</span></div>
+          <div class="stat"><b>${started.length}</b><span>cursos iniciados</span></div>
+          <div class="stat"><b>${lessonsDone}</b><span>lecciones completadas (participación)</span></div>
+          <div class="stat"><b>${avgQ}%</b><span>calificación promedio en evaluaciones</span></div></div>`; })()}
       ${adminTabs('cursos')}
       <div class="card table-wrap"><table>
         <thead><tr><th>Curso</th><th>Categoría</th><th>Lecciones</th><th>Inscritos</th><th>Estado</th><th></th></tr></thead>
@@ -495,13 +537,23 @@
       <div style="height:3rem"></div></div>`;
   };
 
+  views.adminSug = () => {
+    if (!needAdmin()) return null;
+    const list = Store.db.suggestions || [];
+    return `<div class="wrap"><div class="page-head"><h1>Administración</h1></div>${adminTabs('sug')}
+      <div class="card table-wrap"><table><thead><tr><th>Tema sugerido</th><th>Comentario</th><th>Estudiante</th><th>Fecha</th><th></th></tr></thead>
+      <tbody>${list.map(x => `<tr><td><b>${esc(x.topic)}</b></td><td class="small">${esc(x.note || '—')}</td><td class="small">${esc(x.name)}</td><td class="small">${fmtDate(x.createdAt)}</td><td><button class="btn ghost sm" data-del="${x.id}">Archivar</button></td></tr>`).join('') || '<tr><td colspan="5" class="empty">Aún no hay sugerencias.</td></tr>'}</tbody></table></div>
+      <div style="height:3rem"></div></div>`;
+  };
+  views.adminSug.mount = () => { $$('[data-del]').forEach(b => b.onclick = () => { Store.deleteSuggestion(b.dataset.del); toast('Sugerencia archivada'); render(true); }); };
+
   // Editor de cursos
   const COLORS = ['#0E8A6A', '#2F5FD0', '#B4532A', '#7A3FB8', '#0B2A3C', '#C23B6B', '#1F8FB3', '#8A6D1D'];
   let draft = null;
   views.adminCourse = (q, id) => {
     if (!needAdmin()) return null;
     if (!draft || draft._for !== id) {
-      const base = id === 'nuevo' ? { id: Store.uid('c-'), title: '', category: 'Habilidades blandas', level: 'Básico', hours: 2, color: COLORS[0], glyph: 'star', published: false, summary: '', description: '', lessons: [{ id: Store.uid('l'), title: '', type: 'text', minutes: 10, url: '', content: '' }], quiz: { passing: 70, questions: [{ q: '', options: ['', '', '', ''], answer: 0 }] } } : Store.course(id);
+      const base = id === 'nuevo' ? { id: Store.uid('c-'), title: '', category: 'Habilidades blandas', level: 'Básico', hours: 2, color: COLORS[0], glyph: 'star', published: false, objective: '', summary: '', description: '', lessons: [{ id: Store.uid('l'), title: '', type: 'text', minutes: 10, url: '', content: '' }], quiz: { passing: 70, questions: [{ q: '', options: ['', '', '', ''], answer: 0 }] } } : Store.course(id);
       if (!base) return notFound();
       draft = JSON.parse(JSON.stringify(base)); draft._for = id; draft._new = id === 'nuevo';
     }
@@ -518,11 +570,12 @@
             <div class="grid-2"><div class="field"><label>Nivel</label><select data-k="level">${['Básico', 'Intermedio', 'Avanzado'].map(l => `<option ${d.level === l ? 'selected' : ''}>${l}</option>`).join('')}</select></div>
             <div class="field"><label>Horas</label><input type="number" min="1" data-k="hours" value="${d.hours}"></div></div>
           </div>
+          <div class="field"><label>Objetivo de aprendizaje</label><input type="text" data-k="objective" value="${esc(d.objective || '')}" placeholder="Qué será capaz de hacer el estudiante al terminar"></div>
           <div class="field"><label>Resumen (tarjeta del catálogo)</label><input type="text" data-k="summary" value="${esc(d.summary)}" maxlength="140"></div>
           <div class="field"><label>Descripción</label><textarea data-k="description">${esc(d.description)}</textarea></div>
           <div class="grid-2">
             <div class="field"><label>Color</label><div class="color-pick">${COLORS.map((c, i) => `<input type="radio" name="color" id="col${i}" value="${c}" ${d.color === c ? 'checked' : ''}><label for="col${i}" style="background:${c}" title="${c}"></label>`).join('')}</div></div>
-            <div class="field"><label>Ícono</label><select data-k="glyph">${Object.keys(glyphs).map(g => `<option value="${g}" ${d.glyph === g ? 'selected' : ''}>${{ grid: 'Hoja de cálculo', people: 'Equipo', doc: 'Documento', chat: 'Conversación', star: 'Estrella' }[g]}</option>`).join('')}</select></div>
+            <div class="field"><label>Ícono</label><select data-k="glyph">${Object.keys(glyphs).map(g => `<option value="${g}" ${d.glyph === g ? 'selected' : ''}>${{ grid: 'Hoja de cálculo', people: 'Equipo', doc: 'Documento', chat: 'Conversación', clock: 'Reloj', star: 'Estrella' }[g]}</option>`).join('')}</select></div>
           </div>
           <label class="row" style="gap:.5rem;font-weight:600"><input type="checkbox" data-k="published" ${d.published ? 'checked' : ''} style="width:18px;height:18px;accent-color:var(--primary)"> Publicado (visible en el catálogo)</label>
         </div>
@@ -600,7 +653,7 @@
     [/^\/aprender\/([\w-]+)\/([\w-]+)$/, 'lesson'], [/^\/evaluacion\/([\w-]+)$/, 'quiz'],
     [/^\/constancia\/([\w-]+)$/, 'certificate'], [/^\/verificar(?:\/(.+))?$/, 'verify'],
     [/^\/entrar$/, 'login'], [/^\/registro$/, 'register'], [/^\/panel$/, 'dashboard'], [/^\/perfil$/, 'profile'],
-    [/^\/admin$/, 'admin'], [/^\/admin\/estudiantes$/, 'adminStudents'], [/^\/admin\/constancias$/, 'adminCerts'], [/^\/admin\/curso\/([\w-]+)$/, 'adminCourse']
+    [/^\/admin$/, 'admin'], [/^\/admin\/estudiantes$/, 'adminStudents'], [/^\/admin\/constancias$/, 'adminCerts'], [/^\/admin\/sugerencias$/, 'adminSug'], [/^\/ayuda$/, 'help'], [/^\/admin\/curso\/([\w-]+)$/, 'adminCourse']
   ];
   let lastPath = null;
   function render(keepScroll) {
@@ -617,7 +670,7 @@
         views[name].mount && views[name].mount(q, ...m.slice(1));
         if (!keepScroll && path !== lastPath) window.scrollTo(0, 0);
         lastPath = path;
-        const h = $('h1', app); document.title = (h && path !== '/' ? h.textContent + ' · ' : '') + 'Edu Work · Capacitación para estudiantes';
+        const h = $('h1', app); document.title = (h && path !== '/' ? h.textContent + ' · ' : '') + 'EduWork · Capacitación para estudiantes';
         return;
       }
     }
