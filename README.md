@@ -1,4 +1,4 @@
-# Habilita · Plataforma de capacitación para estudiantes
+# Edu Work · Plataforma de capacitación para estudiantes
 
 Prototipo funcional de una plataforma web de capacitación enfocada en las habilidades que piden las empresas (Excel, trabajo en equipo, elaboración de reportes, comunicación profesional).
 
@@ -19,8 +19,8 @@ Desarrollado por **FlympuxLab**.
 ## Cuentas de demostración
 | Rol | Correo | Contraseña |
 | --- | --- | --- |
-| Estudiante | estudiante@habilita.mx | demo123 |
-| Administrador | admin@habilita.mx | admin123 |
+| Estudiante | estudiante@eduwork.mx | demo123 |
+| Administrador | admin@eduwork.mx | admin123 |
 
 ## Nota técnica
 Es un sitio estático (HTML, CSS y JavaScript, sin dependencias). Los datos se guardan en el `localStorage` del navegador, así que cada navegador tiene su propia copia. Para operar con usuarios reales se conecta a una API y base de datos.
